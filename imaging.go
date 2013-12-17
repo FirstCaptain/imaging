@@ -1,9 +1,9 @@
 // Package imaging provides basic image manipulation functions
 // (resize, rotate, flip, crop, etc.) as well as simplified image loading and saving.
-// 
-// This package is based on the standard Go image package. All the image 
-// manipulation functions provided by the package take any image type that 
-// implements image.Image interface, and return a new image of 
+//
+// This package is based on the standard Go image package. All the image
+// manipulation functions provided by the package take any image type that
+// implements image.Image interface, and return a new image of
 // *image.NRGBA type (32 bit RGBA colors, not premultiplied by alpha).
 //
 package imaging
@@ -19,6 +19,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // Open loads an image from file
@@ -33,7 +34,7 @@ func Open(filename string) (img image.Image, err error) {
 	return
 }
 
-// Save saves the image to file with the specified filename. 
+// Save saves the image to file with the specified filename.
 // The format is determined from the filename extension, "jpg" (or "jpeg") and "png" are supported.
 func Save(img image.Image, filename string) (err error) {
 	format := strings.ToLower(filepath.Ext(filename))
@@ -72,7 +73,7 @@ func Save(img image.Image, filename string) (err error) {
 	return
 }
 
-// New creates a new image with the specified width and height, and fills it with the specified color. 
+// New creates a new image with the specified width and height, and fills it with the specified color.
 func New(width, height int, fillColor color.Color) *image.NRGBA {
 	dst := image.NewNRGBA(image.Rect(0, 0, width, height))
 	c := color.NRGBAModel.Convert(fillColor).(color.NRGBA)
@@ -140,6 +141,7 @@ func toNRGBA(src image.Image, clone bool) *image.NRGBA {
 	case *image.NRGBA64:
 		i0 := dst.PixOffset(dstMinX, dstMinY)
 		for y := srcMinY; y < srcMaxY; y, i0 = y+1, i0+dst.Stride {
+			time.Sleep(time.Millisecond * 5)
 			for x, i := srcMinX, i0; x < srcMaxX; x, i = x+1, i+4 {
 
 				j := src0.PixOffset(x, y)
@@ -155,6 +157,7 @@ func toNRGBA(src image.Image, clone bool) *image.NRGBA {
 	case *image.RGBA:
 		i0 := dst.PixOffset(dstMinX, dstMinY)
 		for y := srcMinY; y < srcMaxY; y, i0 = y+1, i0+dst.Stride {
+			time.Sleep(time.Millisecond * 5)
 			for x, i := srcMinX, i0; x < srcMaxX; x, i = x+1, i+4 {
 
 				j := src0.PixOffset(x, y)
@@ -181,6 +184,7 @@ func toNRGBA(src image.Image, clone bool) *image.NRGBA {
 	case *image.RGBA64:
 		i0 := dst.PixOffset(dstMinX, dstMinY)
 		for y := srcMinY; y < srcMaxY; y, i0 = y+1, i0+dst.Stride {
+			time.Sleep(time.Millisecond * 5)
 			for x, i := srcMinX, i0; x < srcMaxX; x, i = x+1, i+4 {
 
 				j := src0.PixOffset(x, y)
@@ -207,6 +211,7 @@ func toNRGBA(src image.Image, clone bool) *image.NRGBA {
 	case *image.Gray:
 		i0 := dst.PixOffset(dstMinX, dstMinY)
 		for y := srcMinY; y < srcMaxY; y, i0 = y+1, i0+dst.Stride {
+			time.Sleep(time.Millisecond * 5)
 			for x, i := srcMinX, i0; x < srcMaxX; x, i = x+1, i+4 {
 
 				j := src0.PixOffset(x, y)
@@ -222,6 +227,7 @@ func toNRGBA(src image.Image, clone bool) *image.NRGBA {
 	case *image.Gray16:
 		i0 := dst.PixOffset(dstMinX, dstMinY)
 		for y := srcMinY; y < srcMaxY; y, i0 = y+1, i0+dst.Stride {
+			time.Sleep(time.Millisecond * 5)
 			for x, i := srcMinX, i0; x < srcMaxX; x, i = x+1, i+4 {
 
 				j := src0.PixOffset(x, y)
@@ -237,6 +243,7 @@ func toNRGBA(src image.Image, clone bool) *image.NRGBA {
 	case *image.YCbCr:
 		i0 := dst.PixOffset(dstMinX, dstMinY)
 		for y := srcMinY; y < srcMaxY; y, i0 = y+1, i0+dst.Stride {
+			time.Sleep(time.Millisecond * 5)
 			for x, i := srcMinX, i0; x < srcMaxX; x, i = x+1, i+4 {
 
 				yj := src0.YOffset(x, y)
@@ -254,6 +261,7 @@ func toNRGBA(src image.Image, clone bool) *image.NRGBA {
 	default:
 		i0 := dst.PixOffset(dstMinX, dstMinY)
 		for y := srcMinY; y < srcMaxY; y, i0 = y+1, i0+dst.Stride {
+			time.Sleep(time.Millisecond * 5)
 			for x, i := srcMinX, i0; x < srcMaxX; x, i = x+1, i+4 {
 
 				c := color.NRGBAModel.Convert(src.At(x, y)).(color.NRGBA)
@@ -604,7 +612,7 @@ func Resize(img image.Image, width, height int, filter ResampleFilter) *image.NR
 		return &image.NRGBA{}
 	}
 
-	// if new width or height is 0 then preserve aspect ratio, minimum 1px  
+	// if new width or height is 0 then preserve aspect ratio, minimum 1px
 	if dstW == 0 {
 		tmpW := float64(dstH) * float64(srcW) / float64(srcH)
 		dstW = int(math.Max(1.0, math.Floor(tmpW+0.5)))
@@ -617,7 +625,7 @@ func Resize(img image.Image, width, height int, filter ResampleFilter) *image.NR
 	src := convertToNRGBA(img)
 	var tmp, dst *image.NRGBA
 
-	// two-pass resize 
+	// two-pass resize
 	if srcW != dstW {
 		tmp = resizeHorizontal(src, dstW, filter)
 	} else {
@@ -790,7 +798,7 @@ func resizeNearest(img image.Image, width, height int) *image.NRGBA {
 		return &image.NRGBA{}
 	}
 
-	// if new width or height is 0 then preserve aspect ratio, minimum 1px  
+	// if new width or height is 0 then preserve aspect ratio, minimum 1px
 	if dstW == 0 {
 		tmpW := float64(dstH) * float64(srcW) / float64(srcH)
 		dstW = int(math.Max(1.0, math.Floor(tmpW+0.5)))
@@ -808,7 +816,7 @@ func resizeNearest(img image.Image, width, height int) *image.NRGBA {
 
 	for dstY := 0; dstY < dstH; dstY++ {
 		fy := float64(srcMinY) + (float64(dstY)+0.5)*dy - 0.5
-
+		time.Sleep(time.Millisecond * 5)
 		for dstX := 0; dstX < dstW; dstX++ {
 			fx := float64(srcMinX) + (float64(dstX)+0.5)*dx - 0.5
 
@@ -828,7 +836,7 @@ func resizeNearest(img image.Image, width, height int) *image.NRGBA {
 	return dst
 }
 
-// Fit scales down the image using the specified resample filter to fit the specified 
+// Fit scales down the image using the specified resample filter to fit the specified
 // maximum width and height and returns the transformed image.
 //
 // Supported resample filters: NearestNeighbor, Box, Linear, Hermite, MitchellNetravali,
@@ -872,7 +880,7 @@ func Fit(img image.Image, width, height int, filter ResampleFilter) *image.NRGBA
 	return Resize(img, newW, newH, filter)
 }
 
-// Thumbnail scales the image up or down using the specified resample filter, crops it 
+// Thumbnail scales the image up or down using the specified resample filter, crops it
 // to the specified width and hight and returns the transformed image.
 //
 // Supported resample filters: NearestNeighbor, Box, Linear, Hermite, MitchellNetravali,
